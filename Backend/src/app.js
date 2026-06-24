@@ -20,4 +20,3 @@ app.use("/api/auth", authRouter);
 app.use("/api/interview", interviewRouter);
 
 module.exports = app
-module.exports = server
