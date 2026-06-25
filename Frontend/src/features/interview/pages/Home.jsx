@@ -1,31 +1,48 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from "react";
 import "../style/home.scss";
 import { useInterview } from "../hooks/useInterview";
-import { useNavigate } from 'react-router'
+import { useNavigate } from "react-router";
 
 const Home = () => {
+  const { loading, generateReport, reports } = useInterview();
+  const [jobDescription, setJobDescription] = useState("");
+  const [selfDescription, setSelfDescription] = useState("");
+  const [fileName, setFileName] = useState("");
+  const resumeInputRef = useRef();
 
-  const {loading, generateReport, reports} = useInterview()
-   const [ jobDescription, setJobDescription ] = useState("")
-    const [ selfDescription, setSelfDescription ] = useState("")
-    const resumeInputRef = useRef()
+  const navigate = useNavigate();
 
+  const handleGenerateReport = async () => {
+    const resumeFile = resumeInputRef.current?.files?.[0];
 
-    const navigate = useNavigate()
+    console.log({
+      jobDescription,
+      selfDescription,
+      resumeFile,
+    });
 
-    const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+    if (!jobDescription.trim()) {
+      alert("Please enter a job description.");
+      return;
     }
 
-     if (loading) {
-        return (
-            <main className='loading-screen'>
-                <h1>Loading your interview plan...</h1>
-            </main>
-        )
+    if (!resumeFile && !selfDescription.trim()) {
+      alert("Please upload a resume or provide a self description.");
+      return;
     }
+
+    const data = await generateReport({
+      jobDescription,
+      selfDescription,
+      resumeFile,
+    });
+
+    if (!data?._id) {
+      return;
+    }
+
+    navigate(`/interview/${data._id}`);
+  };
 
   return (
     <div className="home-page">
@@ -47,18 +64,35 @@ const Home = () => {
           <div className="panel panel--left">
             <div className="panel__header">
               <span className="panel__icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                </svg>
               </span>
               <h2>Target Job Description</h2>
               <span className="badge badge--required">Required</span>
             </div>
             <textarea
-              onChange={(e) => { setJobDescription(e.target.value) }}
+              onChange={(e) => {
+                setJobDescription(e.target.value);
+              }} 
               className="panel__textarea"
               placeholder={`Paste the full job description here...\ne.g. 'Senior Frontend Engineer at Google requires proficiency in React, TypeScript, and large-scale system design...'`}
               maxLength={5000}
             />
-            <div className="char-counter">0 / 5000 chars</div>
+            <div className="char-counter">
+  {jobDescription.length} / 5000 chars
+</div>
           </div>
 
           {/* Vertical Divider */}
@@ -120,8 +154,27 @@ const Home = () => {
                   type="file"
                   id="resume"
                   name="resume"
-                  accept=".pdf,.docx"
+                  accept=".pdf"
+                  onChange={(e) => {
+                    const file = e.target.files[0];
+
+                    if (file) {
+                      setFileName(file.name);
+                    }
+                  }}
                 />
+
+                {fileName && (
+                  <p
+                    style={{
+                      marginTop: "10px",
+                      fontSize: "14px",
+                      color: "#666",
+                    }}
+                  >
+                    Selected: {fileName}
+                  </p>
+                )}
               </label>
             </div>
 
@@ -136,7 +189,9 @@ const Home = () => {
                 Quick Self-Description
               </label>
               <textarea
-                 onChange={(e) => { setSelfDescription(e.target.value) }}
+                onChange={(e) => {
+                  setSelfDescription(e.target.value);
+                }}
                 id="selfDescription"
                 name="selfDescription"
                 className="panel__textarea panel__textarea--short"
@@ -187,7 +242,11 @@ const Home = () => {
           <span className="footer-info">
             AI-Powered Strategy Generation &bull; Approx 30s
           </span>
-          <button onClick={handleGenerateReport} className="button btn-primary" >
+          <button
+            onClick={handleGenerateReport}
+            className="button btn-primary"
+            disabled={loading}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -197,7 +256,8 @@ const Home = () => {
             >
               <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
             </svg>
-            Generate My Interview Strategy
+
+            {loading ? "Generating..." : "Generate My Interview Strategy"}
           </button>
         </div>
       </div>

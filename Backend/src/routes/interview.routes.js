@@ -11,7 +11,13 @@ const interviewRouter = express.Router()
  * resume pdf and job description
  * @access private
  */
-interviewRouter.post("/", authmiddleware.authUser, upload.single("resume"), interviewController.generateInterViewReportController)
+// interviewRouter.post("/", authmiddleware.authUser, upload.single("resume"), interviewController.generateInterViewReportController)
+interviewRouter.post(
+    "/",
+    authmiddleware.authUser,
+    upload.single("resume"),
+    interviewController.generateInterViewReportController
+);
 
 /**
  * @route POST api/interview/report/:interviewId
