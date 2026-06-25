@@ -39,7 +39,6 @@ const Home = () => {
           build a winning strategy.
         </p>
       </header>
-      
 
       {/* Main Card */}
       <div className="interview-card">
