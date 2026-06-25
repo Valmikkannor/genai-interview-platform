@@ -17,15 +17,15 @@ async function generateInterViewReportController(req, res) {
 
         const { jobDescription, selfDescription } = req.body;
 
-        // Job description is mandatory
-        if (!jobDescription ? .trim()) {
+        if (!jobDescription || !jobDescription.trim()) {
             return res.status(400).json({
                 message: "Job description is required",
             });
         }
 
-        // User must provide either resume or self description
-        if (!req.file && !selfDescription ? .trim()) {
+        if (!req.file &&
+            (!selfDescription || !selfDescription.trim())
+        ) {
             return res.status(400).json({
                 message: "Please provide either a resume or self description",
             });
