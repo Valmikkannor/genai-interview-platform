@@ -2,11 +2,9 @@ import axios from "axios"
 
 
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000",
     withCredentials: true
 })
-
-//|| "http://localhost:8000",
 
 /**
  * @description Service to generate interview report based on user self description, resume and job description.

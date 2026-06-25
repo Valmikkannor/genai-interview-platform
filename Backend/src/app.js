@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 const allowedOrigins = [
-    // "http://localhost:5173",
+    "http://localhost:5173",
     "https://genai-interview-platform-1ebl.vercel.app",
 ];
 
@@ -17,6 +17,7 @@ app.use(
             if (!origin || allowedOrigins.includes(origin)) {
                 callback(null, true);
             } else {
+                console.log("Blocked origin:", origin);
                 callback(new Error("Not allowed by CORS"));
             }
         },
