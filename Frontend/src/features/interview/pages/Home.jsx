@@ -14,10 +14,14 @@ const Home = () => {
     const navigate = useNavigate()
 
     const handleGenerateReport = async () => {
-        const resumeFile = resumeInputRef.current.files[ 0 ]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
-        navigate(`/interview/${data._id}`)
+    const resumeFile = resumeInputRef.current.files[0]
+    const data = await generateReport({ jobDescription, selfDescription, resumeFile })
+    if (!data) {
+        // show an error message to the user here
+        return
     }
+    navigate(`/interview/${data._id}`)
+}
 
      if (loading) {
         return (
@@ -204,7 +208,7 @@ const Home = () => {
       </div>
 
       {/* Recent Reports List */}
-      {/* {reports.length > 0 && (
+      {reports.length > 0 && (
         <section className="recent-reports">
           <h2>My Recent Interview Plans</h2>
           <ul className="reports-list">
@@ -227,7 +231,7 @@ const Home = () => {
             ))}
           </ul>
         </section>
-      )} */}
+      )}
 
       {/* Page Footer */}
       <footer className="page-footer">
