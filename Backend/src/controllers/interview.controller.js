@@ -7,49 +7,54 @@ const interviewReportModel = require("../models/interviewReportModel");
 
 async function generateInterViewReportController(req, res) {
     try {
-        if (!req.file) {
-            return res.status(400).json({
-                message: "Resume file is required",
-            });
-        }
-
         const { selfDescription, jobDescription } = req.body;
 
-        if (!selfDescription || !jobDescription) {
+
+        if (!req.file && !selfDescription) {
             return res.status(400).json({
-                message: "selfDescription and jobDescription are required",
+                message: "Either a resume file or a self description is required",
             });
         }
 
-        if (req.file.mimetype !== "application/pdf") {
+        if (!jobDescription) {
             return res.status(400).json({
-                message: "Only PDF files are allowed",
+                message: "jobDescription is required",
             });
         }
 
-        let resumeContent;
+        let resumeContent = "";
 
-        try {
-            resumeContent = await pdfParse(req.file.buffer);
-        } catch (err) {
-            console.error("PDF Parse Error:", err);
 
-            return res.status(400).json({
-                message: "Invalid or corrupted PDF file",
-            });
+        if (req.file) {
+            if (req.file.mimetype !== "application/pdf") {
+                return res.status(400).json({
+                    message: "Only PDF files are allowed",
+                });
+            }
+
+            try {
+                const parsed = await pdfParse(req.file.buffer);
+                resumeContent = parsed.text;
+            } catch (err) {
+                console.error("PDF Parse Error:", err);
+                return res.status(400).json({
+                    message: "Invalid or corrupted PDF file",
+                });
+            }
         }
+
         console.log("BODY:", req.body);
         console.log("FILE:", req.file);
 
         const interViewReportByAi = await generateInterviewReport({
-            resume: resumeContent.text,
+            resume: resumeContent,
             selfDescription,
             jobDescription,
         });
 
         const interviewReport = await interviewReportModel.create({
             user: req.user.id,
-            resume: resumeContent.text,
+            resume: resumeContent,
             selfDescription,
             jobDescription,
             ...interViewReportByAi,
@@ -61,11 +66,7 @@ async function generateInterViewReportController(req, res) {
             interviewReport,
         });
     } catch (error) {
-        console.error(
-            "generateInterViewReportController error:",
-            error
-        );
-
+        console.error("generateInterViewReportController error:", error);
         return res.status(500).json({
             message: "Failed to generate interview report",
             error: error.message,
